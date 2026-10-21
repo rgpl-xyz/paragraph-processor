@@ -30,9 +30,9 @@ interface SheetView {
   failed?: boolean;
 }
 
-// Below this much room above the paragraph the tab would cover the previous block's text,
-// so it moves inside the paragraph's top-right corner instead.
-const MIN_ROOM_ABOVE = 16;
+// Below this much room above the paragraph the 24px tab would cover the previous block's
+// text, not just its line spacing, so it moves inside the paragraph's top-right corner.
+const MIN_ROOM_ABOVE = 18;
 
 // The tab sits above the paragraph's top-right corner, so hovering never moves the page.
 // Pinned, a divider sheet joins the page flow under the text, so it never covers the next
@@ -67,7 +67,8 @@ const CARD_CSS = `
     bottom: 100%;
     z-index: 1000;
     align-items: stretch;
-    height: 20px;
+    /* 24px: the WCAG 2.2 minimum target height, since pages often put links near it */
+    height: 24px;
     background: var(--ink);
     color: var(--paper);
     /* Keeps the ink tab visible on dark pages */
@@ -215,7 +216,7 @@ const CARD_CSS = `
   }
 
   .retry {
-    height: 20px;
+    height: 24px;
   }
 
   .copy {
