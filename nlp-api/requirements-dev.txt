@@ -1,0 +1,9 @@
+-r requirements.txt
+
+# Tests (Starlette's test client uses httpx2)
+pytest==9.1.1
+pytest-cov==7.1.0
+httpx2==2.16.0
+
+# scripts/smoke.py and scripts/benchmark.py
+requests==2.34.2

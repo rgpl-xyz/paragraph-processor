@@ -1,0 +1,7 @@
+# What the service needs at runtime, pinned so every install and image matches.
+fastapi==0.156.8
+uvicorn==0.54.0
+spacy==3.8.16
+
+# The model, as a package, so no separate `spacy download` step is needed
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
