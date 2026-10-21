@@ -8,8 +8,8 @@ module.exports = (env, argv) => {
   return {
     mode: argv.mode || 'production',
   entry: {
-    content: './src/scripts/content.ts',
-    background: './src/scripts/background.ts',
+    content: './src/content/content.ts',
+    background: './src/background/background.ts',
     popup: './src/popup/popup.ts',
   },
   output: {

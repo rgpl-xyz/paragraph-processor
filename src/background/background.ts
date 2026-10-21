@@ -1,4 +1,6 @@
-// Type definitions
+import { FindNounPhrasesResponse, isFindNounPhrasesRequest } from "../shared/messages";
+
+// Type definitions: the NLP API speaks the Azure custom-skill record format
 interface NLPRequestData {
   text: string;
   language: string;
@@ -13,27 +15,19 @@ interface NLPRequestBody {
   values: NLPRequestValue[];
 }
 
+interface NLPResponseRecord {
+  recordId: string;
+  data?: { noun_phrases?: string[] };
+  errors?: { message: string }[] | null;
+}
+
 interface NLPResponse {
-  // Define based on actual API response structure
-  // For now, using a generic structure that can be refined
-  [key: string]: unknown;
+  values?: NLPResponseRecord[];
 }
 
 interface CacheEntry {
-  data: NLPResponse;
+  data: string[];
   timestamp: number;
-}
-
-interface MessageRequest {
-  action: string;
-  raw?: string;
-}
-
-interface MessageResponse {
-  success: boolean;
-  data?: NLPResponse;
-  error?: string;
-  details?: string;
 }
 
 // Configuration
@@ -51,7 +45,7 @@ const CACHE_DURATION = parseInt(process.env.CACHE_DURATION || '300000'); // 5 mi
 const MAX_CACHE_SIZE = parseInt(process.env.MAX_CACHE_SIZE || '1000'); // Maximum number of cached entries
 
 // In-flight requests to prevent duplicates
-const pendingRequests = new Map<string, Promise<NLPResponse>>();
+const pendingRequests = new Map<string, Promise<string[]>>();
 
 // Default headers
 const DEFAULT_HEADERS = {
@@ -122,8 +116,16 @@ async function fetchWithRetry(url: string, options: RequestInit, retries: number
   }
 }
 
+// Unpack the single record we sent into its noun phrases
+function nounPhrasesFrom(response: NLPResponse): string[] {
+  const [record] = response.values ?? [];
+  if (!record) throw new Error("NLP API returned no records");
+  if (record.errors?.length) throw new Error(record.errors.map((error) => error.message).join("; "));
+  return record.data?.noun_phrases ?? [];
+}
+
 // Process text through NLP API
-async function processTextWithNLP(text: string): Promise<NLPResponse> {
+async function processTextWithNLP(text: string): Promise<string[]> {
   const cacheKey = await createCacheKey(text);
   
   // Check cache first
@@ -166,8 +168,8 @@ async function processTextWithNLP(text: string): Promise<NLPResponse> {
         requestOptions
       );
       
-      const result = await response.json() as NLPResponse;
-      
+      const result = nounPhrasesFrom(await response.json() as NLPResponse);
+
       // Cache the successful result
       removeOldestCacheEntry(); // Remove oldest entry if at capacity
       requestCache.set(cacheKey, {
@@ -244,36 +246,18 @@ chrome.runtime.onSuspend.addListener(() => {
 });
 
 // Message listener with optimized handling
-chrome.runtime.onMessage.addListener((request: MessageRequest, _sender, sendResponse: (response: MessageResponse) => void) => {
-  if (request.action === 'fetchData') {
-    // Validate input
-    if (!request.raw || typeof request.raw !== 'string') {
-      sendResponse({ success: false, error: 'Invalid input: raw text is required' });
-      return false;
-    }
-    
-    // Process the request asynchronously
-    processTextWithNLP(request.raw)
-      .then((result) => {
-        console.log('NLP processing successful:', result);
-        sendResponse({ success: true, data: result });
-      })
-      .catch((error) => {
-        console.error('NLP processing failed:', error);
-        sendResponse({ 
-          success: false, 
-          error: error.message || 'Unknown error occurred',
-          details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
-      });
-    
-    // Keep the message channel open
-    return true;
-  }
-  
-  // Handle unknown actions
-  sendResponse({ success: false, error: 'Unknown action' });
-  return false;
+chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse: (response: FindNounPhrasesResponse) => void) => {
+  if (!isFindNounPhrasesRequest(message)) return false;
+
+  processTextWithNLP(message.text)
+    .then((phrases) => sendResponse({ ok: true, phrases }))
+    .catch((error: unknown) => {
+      console.error('NLP processing failed:', error);
+      sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) });
+    });
+
+  // Keep the message channel open for the async reply
+  return true;
 });
 
 // Handle extension installation/update

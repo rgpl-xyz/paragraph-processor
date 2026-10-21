@@ -1,3 +1,5 @@
+import { findNounPhrases } from "./noun-phrases";
+
 // Function to count words in a given text
 function countWords(text: string) {
   return text.trim().split(/\s+/).filter(word => word.length > 0).length;
@@ -290,11 +292,8 @@ function callNlpApi(paragraph: HTMLElement, shadowContent: HTMLDivElement) {
   loadingElement.textContent = 'Processing...';
   shadowContent.appendChild(loadingElement);
   
-  chrome.runtime.sendMessage({ action: 'fetchData', raw: content }, (response: {success: boolean, error: string, data: Response}) => {
-    if (response.success) {
-      const values = response.data.values;
-      const noun_phrases = values.flatMap((value) => value.data.noun_phrases);
-
+  findNounPhrases(content)
+    .then((noun_phrases) => {
       if (noun_phrases.length === 0) {
         const loadingElement = shadowContent.querySelector('#nlp-loading');
         if (loadingElement) {
@@ -325,9 +324,9 @@ function callNlpApi(paragraph: HTMLElement, shadowContent: HTMLDivElement) {
 
       // Apply highlighting to text nodes only to preserve HTML structure
       highlightTextNodes(shadowContent, regex);
-
-    } else {
-      console.error("Fetch error:", response.error);
+    })
+    .catch((error: unknown) => {
+      console.error("Noun phrase lookup failed:", error);
       // Remove loading state and show user-friendly error
       const loadingElement = shadowContent.querySelector('#nlp-loading');
       if (loadingElement) {
@@ -344,8 +343,7 @@ function callNlpApi(paragraph: HTMLElement, shadowContent: HTMLDivElement) {
       errorElement.style.marginTop = '5px';
       errorElement.textContent = 'Unable to process text. Please check your connection or try again.';
       shadowContent.appendChild(errorElement);
-    }
-  });
+    });
 }
 
 async function getUseNLPFlag(): Promise<boolean> {
@@ -423,17 +421,4 @@ function createShadowContainer(paragraph: HTMLElement) {
   shadowContainer.style.boxSizing = "border-box";
 
   return shadowContainer;
-}
-
-interface Data {
-  noun_phrases: string[];
-}
-
-interface Value {
-  recordId: string;
-  data: Data;
-}
-
-interface Response {
-  values: Value[];
 }

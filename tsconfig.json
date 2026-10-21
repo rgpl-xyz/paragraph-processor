@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
     "strict": true,
-    "module": "commonjs",
-    "target": "es6",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "target": "es2022",
+    "lib": ["es2022", "dom", "dom.iterable"],
     "esModuleInterop": true,
     "sourceMap": true,
     "rootDir": "src",
@@ -10,5 +13,5 @@
     "noEmitOnError": true,
     "typeRoots": ["node_modules/@types"]
   },
-  "include": ["src/scripts/*.ts"]
+  "include": ["src/**/*.ts"]
 }
