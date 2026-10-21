@@ -69,8 +69,8 @@ Smart text analysis with NLP-powered noun phrase detection and word counting for
 ### 6. Permissions Justification
 Current permissions are appropriate:
 - `storage`: Required to save user preferences
-- `host_permissions`: Required for API communication; the build sets it to the origin of `API_BASE_URL`
-- The content script's `<all_urls>` match: Required to add the paragraph overlay on any page
+- `host_permissions`: The NLP API's origin, which the background worker calls; the build sets it from `API_BASE_URL`
+- The content script's `<all_urls>` match: Required to add the paragraph overlay on any page. Chrome also counts it as host access to every site, so the worker could reach the API without `host_permissions`; declaring the API origin keeps that access explicit if the content script's sites are ever narrowed
 
 ### 7. Testing Instructions
 For Chrome Web Store reviewers:

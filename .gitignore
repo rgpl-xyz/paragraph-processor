@@ -14,3 +14,8 @@ _metadata
 
 # Test coverage reports
 coverage
+
+# End-to-end runs: the extension built for them, results and reports
+e2e/.extension
+test-results
+playwright-report

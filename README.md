@@ -317,6 +317,15 @@ npm run coverage    # tests with a coverage report
 
 The tests cover paragraph discovery, the overlay, highlighting, the messaging between content script and worker, the NLP API client and the setting. They need neither Chrome nor the NLP API.
 
+### End-to-End Tests
+
+```bash
+npx playwright install chromium   # once
+npm run e2e
+```
+
+The end-to-end suite builds the extension against a stub NLP API, loads it into Chromium and drives a test article (`e2e/article.html`): the tab, pinning, highlighting, retry, the popup switch, axe accessibility checks, keyboard use and reduced motion. Add `--headed` to watch it.
+
 ### Manual Testing
 
 1. **Basic Functionality**:

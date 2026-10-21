@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Field notes</title>
+    <style>
+      body {
+        max-width: 640px;
+        margin: 48px auto;
+        padding: 0 20px;
+        background: #fff;
+        color: #222;
+        font: 18px/1.6 Georgia, serif;
+      }
+
+      #tight {
+        font: 15px/1.35 Arial, sans-serif;
+      }
+
+      #tight p {
+        margin: 4px 0;
+      }
+
+      #dark {
+        margin-top: 28px;
+        padding: 28px 24px;
+        background: #121316;
+        color: #e8e6df;
+      }
+
+      #dark p {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Field notes</h1>
+      <p id="p1">Our mobile application syncs every hour to the data center in Helsinki, and the night shift reads the logs before the morning standup.</p>
+      <p id="p2">Meet at the café after lunch to talk about C++ templates and noun phrases.</p>
+      <a href="#navigated" id="card"><p id="p3">This paragraph sits inside a link, like a news card.</p></a>
+      <p id="p5">This sentence fails on purpose so the error state shows.</p>
+      <p id="p6">With highlighting switched off, pinning this one explains how to turn it on.</p>
+      <section id="tight">
+        <p id="t1">Tightly set copy where paragraphs sit only four pixels apart, so the line above runs right up to the next one.</p>
+        <p id="t2">The tab for this paragraph has no room above it and must move inside.</p>
+      </section>
+      <section id="dark">
+        <p id="d1">A dark site: the tab still needs to stand out against the page.</p>
+      </section>
+      <div id="dynamic"></div>
+    </main>
+    <script>
+      // A busy page: keep changing the DOM while the content script starts up
+      let ticks = 0;
+      const timer = setInterval(() => {
+        document.body.append(document.createElement("div"));
+        if (++ticks === 3) {
+          const paragraph = document.createElement("p");
+          paragraph.id = "p4";
+          paragraph.textContent = "A paragraph added later still gets the extension tab.";
+          document.getElementById("dynamic").append(paragraph);
+        }
+        if (ticks > 30) clearInterval(timer);
+      }, 15);
+    </script>
+  </body>
+</html>
