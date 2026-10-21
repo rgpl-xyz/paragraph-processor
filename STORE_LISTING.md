@@ -32,7 +32,7 @@ Transform how you read and analyze text on any webpage with intelligent Natural 
 • Word Count Analysis - The word count of any paragraph you hover
 • Pin & Process - Pin important text for focused analysis
 • Clean Interface - Non-intrusive hover-based interaction
-• Privacy-First - Your data stays secure, no permanent storage
+• Privacy-First - Nothing leaves your browser unless you switch highlighting on
 
 🎯 PERFECT FOR:
 • Students analyzing academic texts
@@ -47,10 +47,10 @@ Transform how you read and analyze text on any webpage with intelligent Natural 
 4. Toggle NLP processing on/off in settings
 
 🔒 PRIVACY & SECURITY:
-• Text processing happens on secure servers
-• No permanent data storage
-• HTTPS encryption for all communications
-• Local caching for performance
+• Nothing leaves your browser unless you switch highlighting on
+• Then only the paragraphs you pin are sent, to the nlp-spacy-api server the extension was built with
+• No analytics, tracking or ads
+• Your only stored data is the highlighting setting
 
 Install Paragraph Processor today and unlock the power of intelligent text analysis!
 ```

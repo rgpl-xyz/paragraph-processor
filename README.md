@@ -24,7 +24,7 @@ flowchart LR
   worker -- "phrases to highlight" --> content
 ```
 
-The background worker sends the paragraph as one record in Azure's custom-skill format and gets the record back with its noun phrases. Highlighting is off until you switch it on in the toolbar popup, and only then does any text leave the browser: the text of the paragraphs you pin, sent to the nlp-spacy-api address the extension was built with.
+The background worker sends the paragraph as one record in Azure's custom-skill format and gets the record back with its noun phrases. Highlighting is off until you switch it on in the toolbar popup, and only then does any text leave the browser: the text of the paragraphs you pin, sent to the nlp-spacy-api address the extension was built with. [PRIVACY.md](PRIVACY.md) has the details.
 
 ## Running it
 
@@ -98,4 +98,4 @@ Each `*.test.ts` file sits next to the module it tests. `findNounPhrases(text)` 
 
 ## License
 
-[GPL-3.0-or-later](https://www.gnu.org/licenses/gpl-3.0.html).
+GPL-3.0-or-later, see [LICENSE](LICENSE).
