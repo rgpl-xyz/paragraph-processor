@@ -88,20 +88,18 @@ The extension supports environment variables for configuration. This is useful f
    # Cache Configuration
    CACHE_DURATION=300000
    MAX_CACHE_SIZE=1000
-
-   # Development Configuration
-   NODE_ENV=development
    ```
 
 3. **Environment Variables Reference**:
-   - `API_BASE_URL`: Base URL for the NLP API (default: `http://localhost:8080`)
+   - `API_BASE_URL`: Base URL for the NLP API (default: `http://localhost:8080`). The build also writes its origin into the built manifest's `host_permissions`, so this is the only place the API address is set
    - `API_ENDPOINT`: API endpoint for noun phrase extraction (default: `/noun_phrases`)
    - `API_TIMEOUT`: Request timeout in milliseconds (default: `10000`)
    - `API_RETRY_ATTEMPTS`: Number of retry attempts for failed requests (default: `3`)
    - `API_RETRY_DELAY`: Delay between retries in milliseconds (default: `1000`)
-   - `CACHE_DURATION`: Cache entry lifetime in milliseconds (default: `300000` = 5 minutes)
+   - `CACHE_DURATION`: Cache entry lifetime in milliseconds (default: `300000` = 5 minutes). The cache lives in the background service worker, which Chrome stops after about 30 seconds idle, so in practice entries rarely last this long
    - `MAX_CACHE_SIZE`: Maximum number of cached entries (default: `1000`)
-   - `NODE_ENV`: Environment mode (default: `development`)
+
+The defaults live in `webpack.config.js`, and the values are baked in at build time, so rebuild after changing `.env`.
 
 **Note**: The `.env` file is ignored by git to prevent committing sensitive data. Make sure to create your own `.env` file based on `.env.example`.
 
@@ -193,7 +191,7 @@ The extension provides a clean, intuitive interface with the following features:
 4. **Verify Installation**:
    - The extension should now appear in your extensions list
    - You should see the extension icon in your Chrome toolbar
-   - The extension will be listed as "paragraph.counter" (based on package.json name)
+   - The extension will be listed as "Paragraph Processor - Smart Text Analysis" (the `name` in `manifest.json`)
 
 ### Method 2: Load Extension from Source (Alternative)
 
@@ -297,52 +295,58 @@ Once the backend is running, you can view the interactive API documentation at:
 ### Making Changes
 
 1. **Edit Source Files**: Modify files in the `src/` directory
-2. **Rebuild**: Run `npm run build` to compile changes
-3. **Reload Extension**: Go to `chrome://extensions/` and click the refresh icon on your extension
-4. **Test**: Navigate to a webpage and test your changes
+2. **Run the tests**: `npm test` (and `npm run typecheck`)
+3. **Rebuild**: Run `npm run build` to compile changes
+4. **Reload Extension**: Go to `chrome://extensions/` and click the refresh icon on your extension
+5. **Test**: Navigate to a webpage and test your changes
 
 ### File Structure
 
 ```
 paragraph-processor-chrome/
 ├── src/
+│   ├── content/
+│   │   ├── content.ts             # Content script entry: wires the modules below together
+│   │   ├── watch-paragraphs.ts    # Finds each paragraph on the page once, including ones added later
+│   │   ├── paragraph-overlay.ts   # The hover card: copy, word count, pin, highlighting
+│   │   ├── highlight.ts           # Wraps noun phrases in highlight spans
+│   │   └── noun-phrases.ts        # Asks the background worker for a text's noun phrases
+│   ├── background/
+│   │   ├── background.ts          # Service worker entry: answers the content script's messages
+│   │   └── noun-phrase-client.ts  # Calls the NLP API with caching, retries and timeouts
+│   ├── shared/
+│   │   ├── messages.ts            # The message the content script and worker exchange
+│   │   └── settings.ts            # The "Use NLP" setting in chrome.storage.sync
 │   ├── popup/
-│   │   ├── popup.html      # Extension popup UI
-│   │   └── popup.ts        # Popup logic and user settings
-│   ├── scripts/
-│   │   ├── background.ts   # Background script for API communication
-│   │   └── content.ts      # Content script for page interaction
-│   └── images/             # Extension icons
-├── dist/                   # Built extension (generated)
-├── .nvmrc                  # Node.js version specification
-├── manifest.json           # Extension manifest
-├── package.json            # Dependencies and scripts
-├── webpack.config.js       # Build configuration
-└── tsconfig.json           # TypeScript configuration
+│   │   ├── popup.html             # Extension popup UI
+│   │   └── popup.ts               # Popup logic
+│   └── images/                    # Extension icons
+├── dist/                          # Built extension (generated)
+├── .env.example                   # Build-time settings to copy into .env
+├── manifest.json                  # Extension manifest (the build adds host_permissions)
+├── package.json                   # Dependencies and scripts
+├── webpack.config.js              # Build configuration and setting defaults
+├── vitest.config.mjs              # Test configuration
+└── tsconfig.json                  # TypeScript configuration
 ```
 
-### Key Files Explained
+Each `*.test.ts` file sits next to the module it tests.
 
-#### `popup.ts`
-Manages the extension's popup interface and user preferences. Includes:
-- Toggle for enabling/disabling NLP functionality
-- Storage of user preferences using `chrome.storage.sync`
-- Communication with content scripts
+### How the Pieces Fit
 
-#### `background.ts`
-Handles communication between the extension and the NLP API:
-- Listens for messages from content scripts
-- Forwards text data to the backend API
-- Manages API responses and error handling
-
-#### `content.ts`
-Injects functionality into web pages:
-- Dynamically attaches shadow DOM to paragraphs
-- Processes text content for noun phrase extraction
-- Updates UI with highlighted noun phrases
-- Handles page navigation and content changes
+The content script hands every paragraph to the overlay module once. Nothing is built until a paragraph is first hovered. Pinning a card asks for the paragraph's noun phrases through `findNounPhrases(text)`. That function is the only part of the content script that knows about extension messaging, and it gets back a plain list of phrases. The background worker owns everything about the NLP API: the request and response record format, the cache, retries and timeouts. The popup and the content script read the "Use NLP" setting through the same settings module.
 
 ## Testing
+
+### Automated Tests
+
+```bash
+npm test            # unit tests (Vitest + jsdom)
+npm run typecheck   # TypeScript, including the tests
+npm run coverage    # tests with a coverage report
+```
+
+The tests cover paragraph discovery, the overlay, highlighting, the messaging between content script and worker, the NLP API client and the setting. They need neither Chrome nor the NLP API.
 
 ### Manual Testing
 

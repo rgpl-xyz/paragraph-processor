@@ -68,10 +68,9 @@ Smart text analysis with NLP-powered noun phrase detection and word counting for
 
 ### 6. Permissions Justification
 Current permissions are appropriate:
-- `activeTab`: Required to access current page content
-- `scripting`: Required to inject content scripts
 - `storage`: Required to save user preferences
-- `host_permissions`: Required for API communication
+- `host_permissions`: Required for API communication; the build sets it to the origin of `API_BASE_URL`
+- The content script's `<all_urls>` match: Required to add the paragraph overlay on any page
 
 ### 7. Testing Instructions
 For Chrome Web Store reviewers:
@@ -87,7 +86,7 @@ TESTING INSTRUCTIONS:
 7. Verify noun phrases are highlighted with red wavy underlines
 8. Test on different types of content (articles, documentation, etc.)
 
-Note: NLP processing requires the backend API to be running at localhost:8000
+Note: NLP processing requires the backend API to be running at the API_BASE_URL the extension was built with (default localhost:8080)
 ```
 
 ### 8. Screenshots Needed

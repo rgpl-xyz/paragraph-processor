@@ -1,14 +1,15 @@
 import { FindNounPhrasesResponse, isFindNounPhrasesRequest } from "../shared/messages";
 import { createNounPhraseClient } from "./noun-phrase-client";
 
+// webpack bakes these in from .env or its defaults (webpack.config.js)
 const client = createNounPhraseClient({
-  url: `${process.env.API_BASE_URL || 'http://localhost:8080'}${process.env.API_ENDPOINT || '/noun_phrases'}`,
-  timeoutMs: Number(process.env.API_TIMEOUT || 10000),
-  retryAttempts: Number(process.env.API_RETRY_ATTEMPTS || 3),
-  retryDelayMs: Number(process.env.API_RETRY_DELAY || 1000),
+  url: `${process.env.API_BASE_URL}${process.env.API_ENDPOINT}`,
+  timeoutMs: Number(process.env.API_TIMEOUT),
+  retryAttempts: Number(process.env.API_RETRY_ATTEMPTS),
+  retryDelayMs: Number(process.env.API_RETRY_DELAY),
   // The cache lives only as long as this service worker, which Chrome stops after ~30 s idle
-  cacheTtlMs: Number(process.env.CACHE_DURATION || 300000),
-  maxCacheEntries: Number(process.env.MAX_CACHE_SIZE || 1000),
+  cacheTtlMs: Number(process.env.CACHE_DURATION),
+  maxCacheEntries: Number(process.env.MAX_CACHE_SIZE),
 });
 
 chrome.runtime.onMessage.addListener((message: unknown, _sender, sendResponse: (response: FindNounPhrasesResponse) => void) => {

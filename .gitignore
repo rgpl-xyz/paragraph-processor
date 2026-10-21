@@ -11,3 +11,6 @@ _metadata
 .env
 .env.local
 .env.*.local
+
+# Test coverage reports
+coverage
