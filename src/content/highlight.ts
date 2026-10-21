@@ -1,70 +1,65 @@
-// Cache for regex patterns to avoid recreating them
-const regexCache = new Map<string, RegExp>();
+const HIGHLIGHT_CLASS = "highlight";
 
-// Wraps each occurrence of the phrases in `root`'s text in <span class="highlight">
-export function highlightPhrases(root: Node, phrases: string[]): void {
-  if (phrases.length === 0) return;
+// Text inside these is left alone: existing highlights (so a second run adds nothing) and
+// non-rendered text.
+const SKIPPED_ANCESTORS = `.${HIGHLIGHT_CLASS}, script, style`;
 
-  // Create cache key for this set of noun phrases
-  const cacheKey = phrases.sort().join('|');
-
-  // Get or create regex pattern
-  let regex = regexCache.get(cacheKey);
-  if (!regex) {
-    // Create a regular expression that matches any of the noun phrases
-    // (case insensitive). We escape any special characters in the phrase
-    // so that it can be used as part of a regex.
-    const escapedPhrases = phrases.map(phrase => phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    regex = new RegExp(`\\b(${escapedPhrases.join('|')})\\b`, 'gi');
-    regexCache.set(cacheKey, regex);
-  }
-
-  highlightTextNodes(root, regex);
+// Wraps each occurrence of the phrases in `root`'s text in <span class="highlight"> and
+// returns how many it added. A longer phrase wins over a phrase it starts with, case is
+// ignored, and a phrase only matches as a whole word, judged by Unicode letters, so
+// "café" and "C++" match too. Running it twice is harmless.
+export function highlightPhrases(root: Node, phrases: readonly string[]): number {
+  const pattern = phrasePattern(phrases);
+  if (!pattern) return 0;
+  return textNodesToSearch(root).reduce((added, node) => added + wrapMatches(node, pattern), 0);
 }
 
-// Function to safely highlight text nodes without breaking HTML structure
-function highlightTextNodes(element: Node, regex: RegExp) {
-  const walker = document.createTreeWalker(
-    element,
-    NodeFilter.SHOW_TEXT,
-    null
-  );
+function phrasePattern(phrases: readonly string[]): RegExp | null {
+  const unique = [...new Set(phrases.map((phrase) => phrase.trim()).filter(Boolean))];
+  if (unique.length === 0) return null;
 
-  const textNodes: Text[] = [];
-  let node;
-  while (node = walker.nextNode()) {
-    textNodes.push(node as Text);
-  }
+  // Alternation takes the first alternative that matches, so longest goes first
+  const alternatives = unique
+    .sort((a, b) => b.length - a.length)
+    .map((phrase) => escapeRegExp(phrase).replace(/\s+/g, "\\s+"));
+  // Lookarounds instead of \b, which is ASCII-only and never fires beside "é" or after "+"
+  return new RegExp(`(?<![\\p{L}\\p{N}_])(?:${alternatives.join("|")})(?![\\p{L}\\p{N}_])`, "giu");
+}
 
-  textNodes.forEach(textNode => {
-    const text = textNode.textContent || '';
-    const matches = [...text.matchAll(regex)];
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
-    if (matches.length > 0) {
-      const fragment = document.createDocumentFragment();
-      let lastIndex = 0;
-
-      matches.forEach(match => {
-        const matchStart = match.index!;
-        const matchEnd = matchStart + match[0].length;
-
-        if (matchStart > lastIndex) {
-          fragment.appendChild(document.createTextNode(text.slice(lastIndex, matchStart)));
-        }
-
-        const highlight = document.createElement('span');
-        highlight.className = 'highlight';
-        highlight.textContent = match[0];
-        fragment.appendChild(highlight);
-
-        lastIndex = matchEnd;
-      });
-
-      if (lastIndex < text.length) {
-        fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
-      }
-
-      textNode.parentNode?.replaceChild(fragment, textNode);
-    }
+function textNodesToSearch(root: Node): Text[] {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) =>
+      node.parentElement?.closest(SKIPPED_ANCESTORS) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
   });
+  const nodes: Text[] = [];
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    nodes.push(node as Text);
+  }
+  return nodes;
+}
+
+function wrapMatches(node: Text, pattern: RegExp): number {
+  const text = node.data;
+  const matches = [...text.matchAll(pattern)];
+  if (matches.length === 0) return 0;
+
+  const fragment = document.createDocumentFragment();
+  let cursor = 0;
+  for (const match of matches) {
+    const start = match.index ?? 0;
+    if (start > cursor) fragment.append(text.slice(cursor, start));
+    const highlight = document.createElement("span");
+    highlight.className = HIGHLIGHT_CLASS;
+    highlight.textContent = match[0];
+    fragment.append(highlight);
+    cursor = start + match[0].length;
+  }
+  if (cursor < text.length) fragment.append(text.slice(cursor));
+
+  node.replaceWith(fragment);
+  return matches.length;
 }
