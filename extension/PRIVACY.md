@@ -12,7 +12,7 @@ The extension runs on the pages you visit so it can add its tab to paragraphs. W
 
 Nothing, unless you switch on **Noun phrase highlighting** in the extension's toolbar popup. It's off when you install the extension.
 
-With highlighting on, the extension sends the text of each paragraph you **pin**, and nothing else from the page, to an [nlp-spacy-api](https://github.com/rgpl-xyz/nlp-spacy-api) server, which returns the paragraph's noun phrases. Paragraphs you only hover are never sent.
+With highlighting on, the extension sends the text of each paragraph you **pin**, and nothing else from the page, to an [nlp-spacy-api](https://github.com/rgpl-xyz/paragraph-processor/tree/main/nlp-api) server, which returns the paragraph's noun phrases. Paragraphs you only hover are never sent.
 
 The extension doesn't come with a server of its own. It talks to the address it was built with: by default `http://localhost:8080`, a server running on your own computer. If you use a build that points somewhere else, the text goes to that server and the policy of whoever runs it applies. nlp-spacy-api keeps no copy of the texts it analyzes.
 
@@ -43,4 +43,4 @@ Changes to this policy are published in this file in the repository, with a new 
 
 ## Contact
 
-Questions or concerns: open an issue at https://github.com/rgpl-xyz/paragraph-processor-chrome/issues.
+Questions or concerns: open an issue at https://github.com/rgpl-xyz/paragraph-processor/issues.

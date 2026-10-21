@@ -1,18 +1,19 @@
 {
-  "name": "paragraph-processor-chrome",
+  "name": "paragraph-processor-extension",
   "version": "1.0.0",
   "description": "Chrome extension that counts words in paragraphs and highlights their noun phrases using an NLP API",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rgpl-xyz/paragraph-processor-chrome.git"
+    "url": "git+https://github.com/rgpl-xyz/paragraph-processor.git",
+    "directory": "extension"
   },
   "author": "RGPL",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/rgpl-xyz/paragraph-processor-chrome/issues"
+    "url": "https://github.com/rgpl-xyz/paragraph-processor/issues"
   },
-  "homepage": "https://github.com/rgpl-xyz/paragraph-processor-chrome#readme",
+  "homepage": "https://github.com/rgpl-xyz/paragraph-processor/tree/main/extension#readme",
   "scripts": {
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",

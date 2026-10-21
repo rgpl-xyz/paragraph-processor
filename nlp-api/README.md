@@ -4,19 +4,7 @@ A small FastAPI service that runs spaCy over batches of text and returns their n
 
 Made by [RGPL](https://rgpl.xyz).
 
-It's the language side of [Paragraph Processor](https://github.com/rgpl-xyz/paragraph-processor-chrome), a Chrome extension that highlights the noun phrases in any paragraph you pin: the extension sends each pinned paragraph to `/noun_phrases` and marks up what comes back. Requests and responses use Azure AI Search's [custom skill format](https://learn.microsoft.com/azure/search/cognitive-search-custom-skill-interface), so the service also works as a custom skill there.
-
-```mermaid
-flowchart LR
-  subgraph chrome["Chrome: Paragraph Processor"]
-    content["Content script<br/>tab and sheet on the page"]
-    worker["Background worker<br/>cache, retries, timeouts"]
-  end
-  content -- "pinned paragraph's text" --> worker
-  worker -- "POST /noun_phrases" --> api["nlp-spacy-api<br/>FastAPI + spaCy"]
-  api -- "noun phrases" --> worker
-  worker -- "phrases to highlight" --> content
-```
+It's the language half of [Paragraph Processor](../README.md): the Chrome extension in [`extension/`](../extension) sends each paragraph you pin to `/noun_phrases` and highlights what comes back. Requests and responses use Azure AI Search's [custom skill format](https://learn.microsoft.com/azure/search/cognitive-search-custom-skill-interface), so the service also works as a custom skill there.
 
 ## Endpoints
 

@@ -1,6 +1,6 @@
-# Paragraph Processor
+# Paragraph Processor extension
 
-A Chrome extension that shows the word count of any paragraph you hover and, when you pin the paragraph, highlights its noun phrases.
+A Chrome extension that shows the word count of any paragraph you hover and, when you pin the paragraph, highlights its noun phrases. It's one half of [Paragraph Processor](../README.md); the other half is the spaCy service in [`nlp-api/`](../nlp-api).
 
 Made by [RGPL](https://rgpl.xyz).
 
@@ -8,35 +8,20 @@ Made by [RGPL](https://rgpl.xyz).
 
 Hover a paragraph and a small tab appears above its top-right corner with the word count and a Pin button. Pin it and a sheet opens under the paragraph: a copy of the text with its noun phrases marked in yellow, and how many there are. Pin as many paragraphs as you like and unpin them when you're done. The tab and sheet live in a shadow DOM, so the page's styles don't reach them and the paragraph's own text is never changed.
 
-## Works with nlp-spacy-api
+## Works with nlp-api
 
-Word counts happen in the browser. Noun phrases come from [nlp-spacy-api](https://github.com/rgpl-xyz/nlp-spacy-api), a small spaCy service built alongside this extension, so highlighting needs it running.
-
-```mermaid
-flowchart LR
-  subgraph chrome["Chrome: Paragraph Processor"]
-    content["Content script<br/>tab and sheet on the page"]
-    worker["Background worker<br/>cache, retries, timeouts"]
-  end
-  content -- "pinned paragraph's text" --> worker
-  worker -- "POST /noun_phrases" --> api["nlp-spacy-api<br/>FastAPI + spaCy"]
-  api -- "noun phrases" --> worker
-  worker -- "phrases to highlight" --> content
-```
-
-The background worker sends the paragraph as one record in Azure's custom-skill format and gets the record back with its noun phrases. Highlighting is off until you switch it on in the toolbar popup, and only then does any text leave the browser: the text of the paragraphs you pin, sent to the nlp-spacy-api address the extension was built with. [PRIVACY.md](PRIVACY.md) has the details.
+Word counts happen in the browser. Noun phrases come from the service in [`nlp-api/`](../nlp-api), so highlighting needs it running; the [repository README](../README.md) shows how the two fit together. The background worker sends a pinned paragraph as one record in Azure's custom-skill format and gets the record back with its noun phrases. Highlighting is off until you switch it on in the toolbar popup, and only then does any text leave the browser: the text of the paragraphs you pin, sent to the nlp-spacy-api address the extension was built with. [PRIVACY.md](PRIVACY.md) has the details.
 
 ## Running it
 
-You need Node 22.18 or newer (see `.nvmrc`), Chrome, and nlp-spacy-api.
+You need Node 22.18 or newer (see `.nvmrc`), Chrome, and the service.
 
-1. Start nlp-spacy-api on port 8080, in a container or with Python ([its README](https://github.com/rgpl-xyz/nlp-spacy-api#running-it) has both):
+1. Start the service on port 8080, in a container or with Python ([its README](../nlp-api/README.md#running-it) has both):
    ```bash
-   git clone https://github.com/rgpl-xyz/nlp-spacy-api.git
-   cd nlp-spacy-api
+   cd ../nlp-api
    docker build -t nlp-spacy-api . && docker run -p 8080:8080 nlp-spacy-api
    ```
-2. Build the extension:
+2. Build the extension, from this folder:
    ```bash
    npm ci
    npm run build    # or `npm run dev` to rebuild on every save
