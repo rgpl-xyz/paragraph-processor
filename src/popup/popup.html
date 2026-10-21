@@ -1,20 +1,180 @@
-<html>
+<!doctype html>
+<html lang="en">
   <head>
+    <meta charset="utf-8">
+    <title>Paragraph Processor</title>
     <style>
-      body {
-          font-family: Arial, sans-serif;
-          width: 250px;
-          padding: 10px;
+      :root {
+        --ink: #1a1c23;
+        --ink-soft: #5b5d64;
+        --paper: #fffdf5;
+        --marker: #ffd23f;
+        --rule: rgba(26, 28, 35, 0.3);
+        --tab: #1a1c23;
+        --tab-text: #fffdf5;
+        --tab-mark: #ffd23f;
+        color-scheme: light;
       }
-  </style>
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --ink: #fffdf5;
+          --ink-soft: #b8b9bf;
+          --paper: #1a1c23;
+          --rule: rgba(255, 253, 245, 0.3);
+          --tab: #ffd23f;
+          --tab-text: #1a1c23;
+          --tab-mark: #1a1c23;
+          color-scheme: dark;
+        }
+      }
+
+      body {
+        width: 300px;
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font: 14px/1.4 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+
+      /* An index tab standing on a rule, like the one the extension puts on paragraphs */
+      header {
+        padding: 14px 16px 0;
+        border-bottom: 2px solid var(--ink);
+      }
+
+      h1 {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 26px;
+        margin: 0;
+        padding: 0 10px;
+        vertical-align: bottom;
+        background: var(--tab);
+        color: var(--tab-text);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .mark {
+        color: var(--tab-mark);
+        font-size: 15px;
+        letter-spacing: 0;
+      }
+
+      main {
+        padding: 0 16px;
+      }
+
+      .micro {
+        margin: 0;
+        color: var(--ink-soft);
+        font-size: 10px;
+        font-weight: 400;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .setting {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "name name"
+          "state switch";
+        align-items: center;
+        row-gap: 6px;
+        padding-top: 16px;
+        cursor: pointer;
+      }
+
+      .setting .micro {
+        grid-area: name;
+      }
+
+      .state {
+        grid-area: state;
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+
+      input[role="switch"] {
+        grid-area: switch;
+        appearance: none;
+        position: relative;
+        width: 42px;
+        height: 24px;
+        margin: 0;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+        cursor: pointer;
+      }
+
+      input[role="switch"]::before {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        background: var(--ink);
+        transition: transform 140ms ease-out;
+      }
+
+      input[role="switch"]:checked {
+        border-color: var(--marker);
+        background: var(--marker);
+      }
+
+      input[role="switch"]:checked::before {
+        background: #1a1c23;
+        transform: translateX(18px);
+      }
+
+      input[role="switch"]:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+      }
+
+      .note {
+        margin: 8px 0 0;
+        padding-bottom: 14px;
+        border-bottom: 1px dashed var(--rule);
+        color: var(--ink-soft);
+        font-size: 12px;
+      }
+
+      .how {
+        margin: 0;
+        padding: 12px 0 14px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        input[role="switch"]::before {
+          transition: none;
+        }
+      }
+    </style>
   </head>
   <body>
-    <h1>Paragraph counter and NLP Demo</h1>
-    <h2>Settings</h2>
-    <label>
-        <input type="checkbox" id="useNLP">
-        Use NLP to highlight nouns
-    </label>
+    <header>
+      <h1><span class="mark" aria-hidden="true">¶</span>Paragraph Processor</h1>
+    </header>
+    <main>
+      <label class="setting">
+        <span class="micro">Noun phrase highlighting</span>
+        <span class="state" id="useNLPState" aria-hidden="true">Off</span>
+        <input type="checkbox" id="useNLP" role="switch" aria-describedby="useNLPNote">
+      </label>
+      <p class="note" id="useNLPNote">Sends the text of paragraphs you pin to the NLP server.</p>
+      <p class="how">Hover a paragraph for its word count; pin it to mark its noun phrases.</p>
+    </main>
     <script src="popup.js"></script>
   </body>
 </html>

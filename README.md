@@ -4,14 +4,12 @@ This project is a Chrome extension that processes text from paragraphs on web pa
 
 ## Features
 
-- **Paragraph Counter**: Automatically counts words in selected text and displays the count in the extension popup
-- **NLP Text Processing**: Uses Natural Language Processing to identify and highlight noun phrases in text
-- **NLP API Integration**: Communicates with an NLP API to fetch noun phrases for highlighting
-- **Pin to Process**: Allows users to pin specific text for processing with real-time word counting
-- **Dynamic Highlighting**: Automatically attaches shadow DOM to paragraphs and highlights extracted noun phrases with red wavy underlines
-- **Custom User Settings**: Provides users with a toggle to enable or disable NLP processing
-- **Persistent Storage**: Saves user preferences using Chrome's `chrome.storage.sync`
-- **Clean User Interface**: Simple, intuitive popup with settings and processing controls
+- **Word count on hover**: Hovering a paragraph shows a small tab above its top-right corner with the paragraph's word count
+- **Pin to process**: Pinning keeps the tab and opens a sheet under the paragraph, without covering the text around it
+- **Noun phrase highlighting**: With highlighting on, the sheet shows a copy of the paragraph with its noun phrases marked in highlighter yellow, plus how many it found
+- **NLP API Integration**: Fetches the noun phrases from an NLP API through the background worker
+- **One setting**: The toolbar popup turns noun phrase highlighting on or off, saved with `chrome.storage.sync`
+- **Stays out of the page's way**: The tab and sheet live in a shadow DOM on one added element per paragraph, so page styles don't reach them and the paragraph's own text is never changed
 
 ## Prerequisites
 
@@ -142,33 +140,20 @@ dist/
 
 ### User Interface
 
-The extension provides a clean, intuitive interface with the following features:
-
-1. **Main Popup**: 
-   - Title: "Paragraph counter and NLP Demo"
-   - Settings section with toggle controls
-   - Word count display for processed text
-
-2. **Settings Panel**:
-   - **"Use NLP to highlight nouns"** checkbox: Enables/disables Natural Language Processing for noun phrase detection
-   - When enabled, the extension will highlight noun phrases with red wavy underlines
-
-3. **Text Processing**:
-   - **"Pin to process text"** feature: Allows you to select and pin specific text for processing
-   - Real-time word counting: Shows the number of words in the selected text (e.g., "Words: 69")
-   - Visual feedback: Processed text shows highlighted noun phrases and entities
+1. **Paragraph tab**: Hover any paragraph to see a dark tab above its top-right corner (inside the corner when the paragraph above sits too close) with the word count, for example "¶ 42 WORDS", and a **Pin** button
+2. **Pinned sheet**: Pin the paragraph and the button turns yellow and reads **Unpin**. A sheet opens under the paragraph:
+   - With highlighting on, it shows how many noun phrases were found and a copy of the paragraph with them marked in yellow
+   - With highlighting off, it says so and points to the toolbar button
+   - If the lookup fails, it says so and offers **Retry**
+3. **Toolbar popup**: One switch, **Noun phrase highlighting**, on or off
 
 ### Using the Extension
 
 1. **Install and Load**: Follow the installation instructions below
-2. **Navigate to a Webpage**: Go to any webpage with text content
-3. **Open the Extension**: Click the extension icon in your Chrome toolbar
-4. **Enable NLP Processing**: Check the "Use NLP to highlight nouns" option
-5. **Process Text**: 
-   - Select text on the webpage to see word count
-   - Use the "Pin to process text" feature for focused analysis
-   - Observe highlighted noun phrases with red wavy underlines
-6. **Customize Settings**: Toggle NLP processing on/off as needed
+2. **Turn on highlighting**: Click the extension icon in your Chrome toolbar and switch **Noun phrase highlighting** on
+3. **Navigate to a Webpage**: Go to any webpage with text content
+4. **Hover a paragraph** to see its word count
+5. **Pin it** to open its sheet with the noun phrases highlighted; pin as many paragraphs as you like and unpin them when done
 
 ## Chrome Extension Installation
 
@@ -201,33 +186,17 @@ If you prefer to load directly from the source directory:
 2. Click "Load unpacked" and select the root project folder (not `./dist`)
 3. Note: This method requires the source files to be properly structured
 
-### Visual Features
-
-The extension provides several visual indicators to enhance text analysis:
-
-- **Red Wavy Underlines**: Noun phrases and entities are highlighted with red wavy underlines, similar to spell-check indicators
-- **Word Count Display**: Real-time word counting shows in the popup (e.g., "Words: 69")
-- **Pin Icon**: Red pushpin icon indicates pinned text for processing
-- **Clean Interface**: Minimalist popup design with clear settings and controls
-
 ### Screenshots
 
 #### Extension Popup Interface
 ![Extension Popup](images/popup-example.png)
 
-*The main extension popup showing the "Paragraph counter and NLP Demo" interface with settings toggle and clean design.*
+*The toolbar popup with noun phrase highlighting switched on.*
 
 #### Text Processing Example
 ![Text Processing Example](images/example.png)
 
-*Example of the extension processing text with highlighted noun phrases (red wavy underlines) and word count display.*
-
-### Example Usage
-
-1. **Text Selection**: Select any text on a webpage to see the word count update in the extension popup
-2. **NLP Processing**: With NLP enabled, noun phrases like "RGPL", "Site", "mobile application", "information", etc. will be highlighted
-3. **Legal/Technical Documents**: Particularly useful for analyzing legal disclaimers, technical documentation, or any text with complex noun structures
-4. **Educational Content**: Helps identify key concepts and entities in educational materials
+*Two pinned paragraphs: each keeps its tab with the word count, and its sheet shows the noun phrases found, highlighted in a copy of the paragraph.*
 
 ### Troubleshooting Installation
 
@@ -281,8 +250,8 @@ Once the backend is running:
 2. **Test with the extension**:
    - Open any webpage with text content
    - Click the extension icon in the toolbar
-   - Toggle the "Use NLP to highlight nouns" checkbox
-   - The extension should now highlight noun phrases on the page
+   - Switch **Noun phrase highlighting** on
+   - Hover a paragraph and pin it: its sheet should show the noun phrases highlighted
 
 ### 4. API Documentation
 
@@ -308,7 +277,7 @@ paragraph-processor-chrome/
 │   ├── content/
 │   │   ├── content.ts             # Content script entry: wires the modules below together
 │   │   ├── watch-paragraphs.ts    # Finds each paragraph on the page once, including ones added later
-│   │   ├── paragraph-overlay.ts   # The hover card: copy, word count, pin, highlighting
+│   │   ├── paragraph-overlay.ts   # The paragraph tab and pinned sheet: word count, pin, highlighted copy
 │   │   ├── highlight.ts           # Wraps noun phrases in highlight spans
 │   │   └── noun-phrases.ts        # Asks the background worker for a text's noun phrases
 │   ├── background/
@@ -316,7 +285,7 @@ paragraph-processor-chrome/
 │   │   └── noun-phrase-client.ts  # Calls the NLP API with caching, retries and timeouts
 │   ├── shared/
 │   │   ├── messages.ts            # The message the content script and worker exchange
-│   │   └── settings.ts            # The "Use NLP" setting in chrome.storage.sync
+│   │   └── settings.ts            # The noun phrase highlighting setting in chrome.storage.sync
 │   ├── popup/
 │   │   ├── popup.html             # Extension popup UI
 │   │   └── popup.ts               # Popup logic
@@ -334,7 +303,7 @@ Each `*.test.ts` file sits next to the module it tests.
 
 ### How the Pieces Fit
 
-The content script hands every paragraph to the overlay module once. Nothing is built until a paragraph is first hovered. Pinning a card asks for the paragraph's noun phrases through `findNounPhrases(text)`. That function is the only part of the content script that knows about extension messaging, and it gets back a plain list of phrases. The background worker owns everything about the NLP API: the request and response record format, the cache, retries and timeouts. The popup and the content script read the "Use NLP" setting through the same settings module.
+The content script hands every paragraph to the overlay module once. Nothing is built until a paragraph is first hovered. Pinning a paragraph asks for the paragraph's noun phrases through `findNounPhrases(text)`. That function is the only part of the content script that knows about extension messaging, and it gets back a plain list of phrases. The background worker owns everything about the NLP API: the request and response record format, the cache, retries and timeouts. The popup and the content script read the highlighting setting through the same settings module.
 
 ## Testing
 
@@ -356,9 +325,9 @@ The tests cover paragraph discovery, the overlay, highlighting, the messaging be
    - Verify the extension icon appears in the toolbar
 
 2. **NLP Integration**:
-   - Enable the NLP toggle in the popup
-   - Check that noun phrases are highlighted on the page
-   - Disable the toggle and verify highlighting stops
+   - Switch noun phrase highlighting on in the popup
+   - Pin a paragraph and check that its sheet highlights the noun phrases
+   - Switch it off, pin another paragraph and check that its sheet says highlighting is off
 
 3. **Settings Persistence**:
    - Change the NLP setting

@@ -29,7 +29,7 @@ Transform how you read and analyze text on any webpage with intelligent Natural 
 
 🔍 KEY FEATURES:
 • Smart Noun Phrase Detection - Automatically identifies and highlights key concepts
-• Word Count Analysis - Real-time word counting for selected text
+• Word Count Analysis - The word count of any paragraph you hover
 • Pin & Process - Pin important text for focused analysis
 • Clean Interface - Non-intrusive hover-based interaction
 • Privacy-First - Your data stays secure, no permanent storage
@@ -42,7 +42,7 @@ Transform how you read and analyze text on any webpage with intelligent Natural 
 
 ⚡ HOW IT WORKS:
 1. Hover over any paragraph to see word count
-2. Click the pin icon to process text with NLP
+2. Click Pin to process the paragraph with NLP
 3. Watch as noun phrases are highlighted automatically
 4. Toggle NLP processing on/off in settings
 
@@ -81,9 +81,9 @@ TESTING INSTRUCTIONS:
 2. Navigate to any webpage with text content (e.g., news article, blog post)
 3. Hover over paragraphs to see word count functionality
 4. Click the extension icon to open popup
-5. Toggle "Use NLP to highlight nouns" setting
-6. Pin text using the pushpin icon to see NLP processing
-7. Verify noun phrases are highlighted with red wavy underlines
+5. Switch "Noun phrase highlighting" on
+6. Hover a paragraph and click Pin on its tab to see NLP processing
+7. Verify the sheet under the paragraph shows its noun phrases highlighted in yellow
 8. Test on different types of content (articles, documentation, etc.)
 
 Note: NLP processing requires the backend API to be running at the API_BASE_URL the extension was built with (default localhost:8080)
