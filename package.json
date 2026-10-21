@@ -29,16 +29,16 @@
     "@tsconfig/recommended": "^1.0.7",
     "@types/chrome": "^0.1.1",
     "@types/node": "^24.1.0",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^5.0.5",
     "chrome-types": "^0.1.298",
-    "copy-webpack-plugin": "^13.0.0",
+    "copy-webpack-plugin": "^14.0.0",
     "dotenv": "^16.4.7",
     "jsdom": "^26.1.0",
     "playwright-core": "1.64.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.5.4",
-    "vitest": "^3.2.4",
-    "webpack": "^5.93.0",
+    "vitest": "^5.0.5",
+    "webpack": "^5.112.0",
     "webpack-cli": "^6.0.1"
   }
 }
