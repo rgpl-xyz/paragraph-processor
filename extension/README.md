@@ -14,7 +14,7 @@ Word counts happen in the browser. Noun phrases come from the service in [`nlp-a
 
 ## Running it
 
-You need Node 22.18 or newer (see `.nvmrc`), Chrome, and the service.
+You need Node 24.22.1 or newer (see `.nvmrc`), Chrome, and the service.
 
 1. Start the service on port 8080, in a container or with Python ([its README](../nlp-api/README.md#running-it) has both):
    ```bash
